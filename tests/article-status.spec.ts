@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Charger les variables d'environnement
-dotenv.config();
+// Charger les variables d'environnement depuis la racine du projet
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 test('Vérification du statut de l\'article', async ({ page }) => {
   // Accéder à la page de connexion
@@ -13,8 +13,8 @@ test('Vérification du statut de l\'article', async ({ page }) => {
   // Attendre que la page soit chargée
   await page.waitForLoadState('networkidle');
   
-  await page.locator('iframe[name="content"]').contentFrame().locator('iframe[name="login"]').contentFrame().locator('#username').fill('sefraoui.khelil');
-  await page.locator('iframe[name="content"]').contentFrame().locator('iframe[name="login"]').contentFrame().locator('#passwordTextbox').fill('eLexir@1810');
+  await page.locator('iframe[name="content"]').contentFrame().locator('iframe[name="login"]').contentFrame().locator('#username').fill(process.env.EM_USERNAME || '');
+  await page.locator('iframe[name="content"]').contentFrame().locator('iframe[name="login"]').contentFrame().locator('#passwordTextbox').fill(process.env.EM_PASSWORD || '');
   await page.locator('iframe[name="content"]').contentFrame().locator('iframe[name="login"]').contentFrame().locator('#passwordTextbox').press('Enter');
   
   // Attendre que la page soit chargée après la connexion
@@ -30,16 +30,32 @@ test('Vérification du statut de l\'article', async ({ page }) => {
   const status = await contentFrame.locator('#row1').locator('td').nth(5).textContent();
   const trimmedStatus = status?.trim() || 'Non disponible';
   
-  // Lire le template du fichier status.md
+  // Récupérer le numéro du manuscrit et le titre
+  const manuscriptNumber = await contentFrame.locator('#row1').locator('td').nth(1).textContent();
+  const title = await contentFrame.locator('#row1').locator('td').nth(2).textContent();
+  
+  // Créer le contenu du fichier status.md
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleString('fr-FR', { 
+    timeZone: 'Europe/Paris',
+    dateStyle: 'full',
+    timeStyle: 'long'
+  });
+
+  const content = `# Statut de l'article MEDNUC
+
+Dernière vérification : ${formattedDate}
+
+## Informations de l'article
+- **Numéro du manuscrit** : ${manuscriptNumber?.trim()}
+- **Titre** : ${title?.trim()}
+- **État d'avancement** : ${trimmedStatus}
+
+---
+_Timestamp de vérification : ${currentDate.getTime()}_`;
+
+  // Écrire le contenu dans le fichier
   const statusFilePath = path.join(process.cwd(), 'status.md');
-  let content = fs.readFileSync(statusFilePath, 'utf8');
-  
-  // Mettre à jour le contenu avec le nouveau statut et la date
-  const currentDate = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
-  content = content.replace('<!-- DATE -->', currentDate);
-  content = content.replace('<!-- STATUS -->', trimmedStatus);
-  
-  // Écrire le nouveau contenu dans le fichier
   fs.writeFileSync(statusFilePath, content);
   
   console.log('État d\'avancement de l\'article:', trimmedStatus);
