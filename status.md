@@ -1,6 +1,6 @@
 # Statut de l'article MEDNUC
 
-Dernière vérification : dimanche 9 mars 2025 à 20:51:47 UTC+1
+Dernière vérification : dimanche 9 mars 2025 à 21:03:44 UTC+1
 
 ## Informations de l'article
 - **Numéro du manuscrit** : MEDNUC-D-24-00033
@@ -8,4 +8,4 @@ Dernière vérification : dimanche 9 mars 2025 à 20:51:47 UTC+1
 - **État d'avancement** : Under Review / En cours d'expertise
 
 ---
-_Timestamp de vérification : 1741549907060_
+_Timestamp de vérification : 1741550624864_
