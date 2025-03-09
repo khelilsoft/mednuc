@@ -1,0 +1,25 @@
+<div class="container" *ngIf="status$ | async as status">
+  <h1>Statut de l'article MEDNUC</h1>
+  
+  <div class="status-card">
+    <div class="last-check">
+      Dernière vérification : {{ status.lastCheck }}
+    </div>
+
+    <div class="article-info">
+      <h2>Informations de l'article</h2>
+      <div class="info-item">
+        <strong>Numéro du manuscrit :</strong>
+        <span>{{ status.manuscriptNumber }}</span>
+      </div>
+      <div class="info-item">
+        <strong>Titre :</strong>
+        <span>{{ status.title }}</span>
+      </div>
+      <div class="info-item status">
+        <strong>État d'avancement :</strong>
+        <span>{{ status.status }}</span>
+      </div>
+    </div>
+  </div>
+</div>

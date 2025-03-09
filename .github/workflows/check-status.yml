@@ -1,4 +1,4 @@
-name: Check Article Status
+name: Check Article Status and Deploy
 
 on:
   schedule:
@@ -6,37 +6,42 @@ on:
   workflow_dispatch:  # Permet l'exécution manuelle
 
 jobs:
-  check-status:
+  check-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
         
-    - name: Install dependencies
+    - name: Install Playwright and run status check
       run: |
+        cd mednuc-status
         npm ci
+        npm install -D @playwright/test
         npx playwright install --with-deps firefox
         
     - name: Run status check
       env:
         EM_USERNAME: ${{ secrets.EM_USERNAME }}
         EM_PASSWORD: ${{ secrets.EM_PASSWORD }}
-      run: npx playwright test --project=firefox
-      
-    - name: Commit and push if changed
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add status.md
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update article status" && git push origin HEAD:main) 
+        cd mednuc-status
+        npx playwright test --project=firefox
+        
+    - name: Install and Build Angular app
+      run: |
+        cd mednuc-status
+        npm install
+        npm run build -- --base-href=/mednuc/
+        
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: mednuc-status/dist/mednuc-status/browser
+        branch: gh-pages 

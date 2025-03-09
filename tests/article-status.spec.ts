@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import dotenv from 'dotenv';
-import * as fs from 'fs';
 import * as path from 'path';
+import { updateStatus } from '../mednuc-status/update-status';
 
 // Charger les variables d'environnement depuis la racine du projet
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
@@ -25,41 +25,21 @@ test('Vérification du statut de l\'article', async ({ page }) => {
   // Attendre que l'iframe principal soit disponible
   const contentFrame = await page.frameLocator('iframe[name="content"]');
   
-  // Attendre que le tableau soit visible et récupérer l'état d'avancement (6ème cellule)
+  // Attendre que le tableau soit visible et récupérer les informations
   await contentFrame.locator('#row1').waitFor();
-  const status = await contentFrame.locator('#row1').locator('td').nth(5).textContent();
-  const trimmedStatus = status?.trim() || 'Non disponible';
-  
-  // Récupérer le numéro du manuscrit et le titre
   const manuscriptNumber = await contentFrame.locator('#row1').locator('td').nth(1).textContent();
   const title = await contentFrame.locator('#row1').locator('td').nth(2).textContent();
+  const status = await contentFrame.locator('#row1').locator('td').nth(5).textContent();
+
+  // Mettre à jour le fichier de statut
+  updateStatus(
+    manuscriptNumber?.trim() || '',
+    title?.trim() || '',
+    status?.trim() || 'Non disponible'
+  );
   
-  // Créer le contenu du fichier status.md
-  const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleString('fr-FR', { 
-    timeZone: 'Europe/Paris',
-    dateStyle: 'full',
-    timeStyle: 'long'
-  });
-
-  const content = `# Statut de l'article MEDNUC
-
-Dernière vérification : ${formattedDate}
-
-## Informations de l'article
-- **Numéro du manuscrit** : ${manuscriptNumber?.trim()}
-- **Titre** : ${title?.trim()}
-- **État d'avancement** : ${trimmedStatus}
-
----
-_Timestamp de vérification : ${currentDate.getTime()}_`;
-
-  // Écrire le contenu dans le fichier
-  const statusFilePath = path.join(process.cwd(), 'status.md');
-  fs.writeFileSync(statusFilePath, content);
-  
-  console.log('État d\'avancement de l\'article:', trimmedStatus);
-  console.log('Statut mis à jour dans status.md');
+  console.log('État d\'avancement de l\'article:', status?.trim());
+  console.log('Statut mis à jour dans status.json');
 
   // Vérifier que le statut est présent
   expect(status).toBeTruthy();
