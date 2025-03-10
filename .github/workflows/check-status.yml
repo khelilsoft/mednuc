@@ -21,9 +21,7 @@ jobs:
         
     - name: Install Playwright and run status check
       run: |
-        cd mednuc-status
         npm ci
-        npm install -D @playwright/test
         npx playwright install --with-deps firefox
         
     - name: Run status check
