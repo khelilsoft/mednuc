@@ -30,9 +30,7 @@ jobs:
       env:
         EM_USERNAME: ${{ secrets.EM_USERNAME }}
         EM_PASSWORD: ${{ secrets.EM_PASSWORD }}
-      run: |
-        cd mednuc-status
-        npx playwright test --project=firefox
+      run: npx playwright test --project=firefox
         
     - name: Install and Build Angular app
       run: |
@@ -44,4 +42,6 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: mednuc-status/dist/mednuc-status/browser
-        branch: gh-pages 
+        branch: gh-pages
+        clean: true # Supprime les anciens fichiers
+        single-commit: true # Garde uniquement le dernier commit dans la branche gh-pages 
