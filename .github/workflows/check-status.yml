@@ -1,45 +1,45 @@
-name: Check Article Status and Deploy
+# name: Check Article Status and Deploy
 
-on:
-  schedule:
-    - cron: '0 8 * * *'  # Exécution tous les jours à 8h00
-  workflow_dispatch:  # Permet l'exécution manuelle
+# on:
+#   schedule:
+#     - cron: '0 8 * * *'  # Exécution tous les jours à 8h00
+#   workflow_dispatch:  # Permet l'exécution manuelle
 
-jobs:
-  check-and-deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+# jobs:
+#   check-and-deploy:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write
     
-    steps:
-    - uses: actions/checkout@v3
+#     steps:
+#     - uses: actions/checkout@v3
     
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+#     - name: Setup Node.js
+#       uses: actions/setup-node@v3
+#       with:
+#         node-version: '18'
         
-    - name: Install Playwright and run status check
-      run: |
-        npm ci
-        npx playwright install --with-deps firefox
+#     - name: Install Playwright and run status check
+#       run: |
+#         npm ci
+#         npx playwright install --with-deps firefox
         
-    - name: Run status check
-      env:
-        EM_USERNAME: ${{ secrets.EM_USERNAME }}
-        EM_PASSWORD: ${{ secrets.EM_PASSWORD }}
-      run: npx playwright test --project=firefox
+#     - name: Run status check
+#       env:
+#         EM_USERNAME: ${{ secrets.EM_USERNAME }}
+#         EM_PASSWORD: ${{ secrets.EM_PASSWORD }}
+#       run: npx playwright test --project=firefox
         
-    - name: Install and Build Angular app
-      run: |
-        cd mednuc-status
-        npm install
-        npm run build -- --base-href=/mednuc/
+#     - name: Install and Build Angular app
+#       run: |
+#         cd mednuc-status
+#         npm install
+#         npm run build -- --base-href=/mednuc/
         
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: mednuc-status/dist/mednuc-status/browser
-        branch: gh-pages
-        clean: true # Supprime les anciens fichiers
-        single-commit: true # Garde uniquement le dernier commit dans la branche gh-pages 
+#     - name: Deploy to GitHub Pages
+#       uses: JamesIves/github-pages-deploy-action@v4
+#       with:
+#         folder: mednuc-status/dist/mednuc-status/browser
+#         branch: gh-pages
+#         clean: true # Supprime les anciens fichiers
+#         single-commit: true # Garde uniquement le dernier commit dans la branche gh-pages 
